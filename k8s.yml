@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: projector
+spec:
+  replicas: 1
+  serviceName: projector
+  selector:
+    matchLabels:
+      app: projector
+  template:
+    metadata:
+      labels:
+        app: projector
+    spec:
+      containers:
+      - image: ramiro/projector-idea-c
+        name: ide
+        command: 
+          - bash 
+          - -c
+          - "nginx && ./run.sh"
+        volumeMounts:
+          - name: data
+            mountPath: /home/projector-user
+        ports:
+          - containerPort: 8080
+            name: nginx
+          - containerPort: 8887
+            name: ws
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: projector
+  annotations:
+    dev.okteto.com/auto-ingress: "true"
+spec:
+  type: ClusterIP  
+  ports:
+  - name: "nginx"
+    port: 8080
+  - name: "ws"
+    port: 8887
+  selector:
+    app: projector
