@@ -1,0 +1,14 @@
+services:
+  ide:
+    public: true
+    image: ramiro/projector-idea-c
+    replicas: 1
+    command: 
+      - bash 
+      - -c
+      - "nginx && ./run.sh"
+    ports:
+      - 8080
+      - 8887
+    volumes:
+      - /home/projector-user
